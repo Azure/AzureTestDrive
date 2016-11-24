@@ -1,0 +1,22 @@
+{
+  "name": "azure-test-drive-devkit",
+  "version": "1.0.0",
+  "description": "TestDriveDevKit",
+  "author": "Microsoft Corporation",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/Azure/AzureTestDrive",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Azure/AzureTestDrive.git"
+  },
+  "tags": [
+    "azure",
+    "test-drive"
+  ],
+  "main": "test-drive.js",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "lodash": "^4.17.2",
+    "uuid": "^3.0.0"
+  }
+}

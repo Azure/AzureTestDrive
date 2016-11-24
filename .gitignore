@@ -1,2 +1,10 @@
 # gitignore - Specifies intentionally untracked files to ignore
 # https://git-scm.com/docs/gitignore
+
+*.njsproj
+*.sln
+.vs/
+bin/
+node_modules/
+obj/
+typings/

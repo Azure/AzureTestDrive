@@ -1,0 +1,56 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appBaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Base part of unique application name."
+      },
+      "defaultValue": "contososimple"
+    },
+    "baseUri": {
+      "type": "string",
+      "metadata": {
+        "type": "baseuri",
+        "description": "Base URI for this deployment template."
+      }
+    },
+    "sessionId": {
+      "type": "string",
+      "metadata": {
+        "type": "sessionid",
+        "description": "Unique session id."
+      }
+    },
+    "username": {
+      "type": "string",
+      "metadata": {
+        "type": "username",
+        "description": "Demo user name."
+      }
+    },
+    "password": {
+      "type": "securestring",
+      "metadata": {
+        "type": "password",
+        "description": "Demo user password."
+      }
+    }
+  },
+  "resources": [],
+  "outputs": {
+    "uri": {
+      "type": "string",
+      "value": "[concat('http://www.contoso.com/',parameters('sessionId'))]"
+    },
+    "username": {
+      "type": "string",
+      "value": "[parameters('username')]"
+    },
+    "password": {
+      "type": "string",
+      "value": "[parameters('password')]"
+    }
+  }
+}
