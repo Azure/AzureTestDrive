@@ -19,6 +19,9 @@ else if (args[0] === "start") {
 else if (args[0] === "status") {
     require("./lib/status-command.js").run({});
 }
+else if (args[0] === "operations") {
+    require("./lib/operations-command.js").run({});
+}
 else {
     throw new Error(`Unknown command: ${args[0]}`);
 }
