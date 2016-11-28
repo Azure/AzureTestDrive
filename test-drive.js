@@ -16,6 +16,9 @@ else if (args[0] === "start") {
         settingsFileName: args[1]
     });
 }
+else if (args[0] === "status") {
+    require("./lib/status-command.js").run({});
+}
 else {
     throw new Error(`Unknown command: ${args[0]}`);
 }
