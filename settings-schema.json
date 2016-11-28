@@ -1,0 +1,86 @@
+﻿﻿ {
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "publisherId": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z-]+$",
+      "description": "Publisher identifier (lower-case letters, digits and dash character)."
+    },
+    "labId": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z-]+$",
+      "description": "Lab identifier (lower-case letters, digits and dash character)."
+    },
+    "subscriptionInfo": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/SubscriptionInfo"
+        }
+      ],
+      "description": "Target subscription details."
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Deployment location."
+    },
+    "deploymentTemplateUri": {
+      "type": "string",
+      "minLength": 1,
+      "description": "URI of the deployment template."
+    },
+    "baseUri": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Base URI of the deployment package."
+    }
+  },
+  "required": [
+    "publisherId",
+    "labId",
+    "subscriptionInfo",
+    "location",
+    "deploymentTemplateUri",
+    "baseUri"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "SubscriptionInfo": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+          "description": "Subscription Id (GUID)"
+        },
+        "tenantId": {
+          "type": "string",
+          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+          "description": "Tenant Id (GUID)"
+        },
+        "appId": {
+          "type": "string",
+          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
+          "description": "Application Id or Client Id (GUID)"
+        },
+        "appKey": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Application Key or Application Secret"
+        }
+      },
+      "required": [
+        "subscriptionId",
+        "tenantId",
+        "appId",
+        "appKey"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

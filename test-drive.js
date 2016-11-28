@@ -11,6 +11,11 @@ if (args[0] === "validate") {
         templateFileName: args[1]
     });
 }
+else if (args[0] === "start") {
+    require("./lib/start-command.js").run({
+        settingsFileName: args[1]
+    });
+}
 else {
     throw new Error(`Unknown command: ${args[0]}`);
 }
