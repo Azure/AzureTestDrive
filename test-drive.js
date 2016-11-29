@@ -21,16 +21,16 @@ if (args[0] === "validate") {
     validateTemplate(args[1]);
 }
 else if (args[0] === "start") {
-    startSession(args[1]);
+    startSession(args[1], args[2]);
 }
 else if (args[0] === "status") {
-    getDeploymentStatus();
+    getDeploymentStatus(args[1]);
 }
 else if (args[0] === "operations") {
-    getDeploymentOperations();
+    getDeploymentOperations(args[1]);
 }
 else if (args[0] === "stop") {
-    stopSession();
+    stopSession(args[1]);
 }
 else {
     throw new Error(`Unknown command: ${args[0]}`);
@@ -55,7 +55,7 @@ function validateTemplate(templateFileName) {
     logSvc.verbose(JSON.stringify(parameters, null, 2));
 }
 
-function startSession(settingsFileName) {
+function startSession(settingsFileName, sessionName) {
     var _armSvc = new ArmSvc();
 
     var settings = JSON.parse(fs.readFileSync(settingsFileName, "utf-8").replace(/^\ufeff/, ''));
@@ -98,13 +98,13 @@ function startSession(settingsFileName) {
         logSvc.info("Parameters created");
         logSvc.verbose(JSON.stringify(_armSvc.sessionDetails().parameters, null, 2));
 
-        sessionDetailsSvc.write(_armSvc.sessionDetails());
+        sessionDetailsSvc.write(_armSvc.sessionDetails(), sessionName);
     }
 }
 
-function getDeploymentStatus() {
+function getDeploymentStatus(sessionName) {
     var _armSvc = new ArmSvc();
-    _armSvc.sessionDetails(sessionDetailsSvc.read());
+    _armSvc.sessionDetails(sessionDetailsSvc.read(sessionName));
 
     Q.fcall(_armSvc.authenticate)
         .then(_armSvc.getDeployment)
@@ -130,18 +130,18 @@ function getDeploymentStatus() {
     }
 }
 
-function getDeploymentOperations() {
+function getDeploymentOperations(sessionName) {
     var _armSvc = new ArmSvc();
-    _armSvc.sessionDetails(sessionDetailsSvc.read());
+    _armSvc.sessionDetails(sessionDetailsSvc.read(sessionName));
 
     Q.fcall(_armSvc.authenticate)
         .then(_armSvc.getDeploymentOperations)
         .done();
 }
 
-function stopSession() {
+function stopSession(sessionName) {
     var _armSvc = new ArmSvc();
-    _armSvc.sessionDetails(sessionDetailsSvc.read());
+    _armSvc.sessionDetails(sessionDetailsSvc.read(sessionName));
 
     Q.fcall(_armSvc.authenticate)
         .then(_armSvc.deleteResourceGroup)
