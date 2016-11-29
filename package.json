@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TestDriveDevKit",
   "author": "Microsoft Corporation",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://github.com/Azure/AzureTestDrive",
   "repository": {
     "type": "git",
