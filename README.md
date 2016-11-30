@@ -1,6 +1,6 @@
-# Azure Test Drive
+# Azure Test Drive Dev Kit
 
-Azure Test Drive is a "try before you buy solution for Azure". This project provides a tool set which helps you to build, test, and debug you own Azure Test Drive solution.
+Azure Test Drive is a "try before you buy solution for Azure". This project provides a tool set which helps you to build, test, and debug your own Azure Test Drive solution.
 
 * [Installation](#installation)
 * [Quick Guide](#quick-guide)
@@ -198,7 +198,7 @@ Deployment Operations retrieved
 ]
 ```
 
-This information is also available thru the [Azure Portal](https://portal.azure.com/). See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
+This information is also available through the [Azure Portal](https://portal.azure.com/). See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
 
 ### Stop Session
 
