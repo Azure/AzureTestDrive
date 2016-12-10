@@ -2,7 +2,7 @@
 
 Azure Test Drive is a "try before you buy solution for Azure". We have a full <b>[Wiki](https://github.com/Azure/AzureTestDrive/wiki/home)</b> to walkthrough what a Test Drive is and how to build one!
 
-Below is our prototype tool to helps you to develop, test, and debug your own Azure Test Drive ARM template solution.
+Below is our ReadME for a prototype tool to help to develop, test, and debug your own Azure Test Drive ARM template solution.
 
 # Azure Test Drive Dev Kit
 
