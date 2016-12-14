@@ -33,7 +33,51 @@ else if (args[0] === "stop") {
     stopSession(args[1]);
 }
 else {
-    throw new Error(`Unknown command: ${args[0]}`);
+    console.log(`
+Azure Test Drive enables customers the option to "try before you buy" products
+found on Azure Marketplace. This tool helps to develop, test, and debug your
+own Azure Test Drive ARM template solution.
+
+
+VALIDATE
+
+    The validate command performs the basic validation on your template, and
+    displays the sample set of parameters which Azure Test Drive will use to
+    instantiate a template.
+
+    node test-drive.js validate samples/contoso_simple/package/main-template.json
+
+START SESSION
+
+    The start session command instantiates your template using the specified
+    Azure subscription.
+
+    node test-drive.js start settings.json [<session-name>]
+
+    Settings.json format:
+    https://github.com/Azure/AzureTestDrive#start-session
+
+GET DEPLOYMENT STATUS
+
+    Template deployment is a long-running operation. The get deployment status
+    command displays the status of your deployment.
+
+    node test-drive.js status [<session-name>]
+
+GET DEPLOYMENT OPERATIONS
+
+    The get deployment operations command displays information about every
+    deployment operation from your template:
+
+    node test-drive.js operations [<session-name>]
+
+STOP SESSION
+
+    The stop session command performs a cleanup. Basically, it just deletes
+    the resource group which was used for deployment:
+
+    node test-drive.js stop [<session-name>]
+`);
 }
 
 return;
