@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <parameters>
   <parameter name="UserName" description="N/A" defaultValue="" tags="">
-    <parameterEntry kind="XmlFile" scope="obj\\Debug\\Package\\PackageTmp\\Web\.config$" match="//appSettings/add[@key='UserName']/@value" />
+    <parameterEntry kind="XmlFile" scope="obj\\Release\\Package\\PackageTmp\\Web\.config$" match="//appSettings/add[@key='UserName']/@value" />
   </parameter>
   <parameter name="Password" description="N/A" defaultValue="" tags="">
-    <parameterEntry kind="XmlFile" scope="obj\\Debug\\Package\\PackageTmp\\Web\.config$" match="//appSettings/add[@key='Password']/@value" />
+    <parameterEntry kind="XmlFile" scope="obj\\Release\\Package\\PackageTmp\\Web\.config$" match="//appSettings/add[@key='Password']/@value" />
   </parameter>
 </parameters>
