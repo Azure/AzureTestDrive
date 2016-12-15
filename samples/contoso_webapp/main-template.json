@@ -1,0 +1,97 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminName": {
+      "type": "string",
+      "metadata": {
+        "type": "username",
+        "description": "Admin user name."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "type": "password",
+        "description": "Admin password."
+      }
+    },
+    "baseUri": {
+      "type": "string",
+      "metadata": {
+        "type": "baseuri",
+        "description": "Base URI for this deployment template."
+      }
+    }
+  },
+  "variables": {
+    "appName": "[concat('contosowebapp',uniquestring(resourceGroup().id))]",
+    "location": "[resourceGroup().location]",
+    "serverFarmName": "[concat(variables('appName'),'Farm')]",
+    "serverFarmTierName": "D1",
+    "serverFarmCapacity": 1,
+    "packageUri": "[concat(parameters('baseUri'),'contoso_webapp.zip')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[variables('serverFarmName')]",
+      "apiVersion": "2015-08-01",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('serverFarmTierName')]",
+        "capacity": "[variables('serverFarmCapacity')]"
+      },
+      "properties": {
+        "name": "[variables('serverFarmName')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('appName')]",
+      "apiVersion": "2015-08-01",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms',variables('serverFarmName'))]"
+      ],
+      "properties": {
+        "name": "[variables('appName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('serverFarmName'))]"
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "MSDeploy",
+          "apiVersion": "2015-08-01",
+          "location": "[variables('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites',variables('appName'))]"
+          ],
+          "properties": {
+            "packageUri": "[variables('packageUri')]",
+            "dbType": "None",
+            "setParameters": {
+              "IIS Web Application Name": "[variables('appName')]",
+              "UserName": "[parameters('adminName')]",
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "App Uri": {
+      "type": "string",
+      "value": "[concat('http://',variables('appName'),'.azurewebsites.net/')]"
+    },
+    "User Name": {
+      "type": "string",
+      "value": "[parameters('adminName')]"
+    },
+    "Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    }
+  }
+}

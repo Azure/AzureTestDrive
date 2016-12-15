@@ -1,0 +1,101 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique app name (it will be a part of app Uri)."
+      }
+    },
+    "adminName": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin user name."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment location."
+      }
+    },
+    "serverFarmTierName": {
+      "type": "string",
+      "metadata": {
+        "description": "Server Farm tier name."
+      }
+    },
+    "serverFarmCapacity": {
+      "type": "int",
+      "metadata": {
+        "description": "Server Farm capacity."
+      }
+    },
+    "packageUri": {
+      "type": "string",
+      "metadata": {
+        "description": "Web deployment package Uri."
+      }
+    }
+  },
+  "variables": {
+    "serverFarmName": "[concat(parameters('appName'),'Farm')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[variables('serverFarmName')]",
+      "apiVersion": "2015-08-01",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('serverFarmTierName')]",
+        "capacity": "[parameters('serverFarmCapacity')]"
+      },
+      "properties": {
+        "name": "[variables('serverFarmName')]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[parameters('appName')]",
+      "apiVersion": "2015-08-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms',variables('serverFarmName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('appName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('serverFarmName'))]"
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "MSDeploy",
+          "apiVersion": "2015-08-01",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites',parameters('appName'))]"
+          ],
+          "properties": {
+            "packageUri": "[parameters('packageUri')]",
+            "dbType": "None",
+            "setParameters": {
+              "IIS Web Application Name": "[parameters('appName')]",
+              "UserName": "[parameters('adminName')]",
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}
