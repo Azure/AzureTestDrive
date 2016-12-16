@@ -5,7 +5,7 @@
     "appName": {
       "type": "string",
       "metadata": {
-        "description": "Unique app name (it will be a part of app Uri)."
+        "description": "Unique app name."
       }
     },
     "adminName": {
@@ -37,16 +37,11 @@
       "metadata": {
         "description": "Server Farm capacity."
       }
-    },
-    "packageUri": {
-      "type": "string",
-      "metadata": {
-        "description": "Web deployment package Uri."
-      }
     }
   },
   "variables": {
-    "serverFarmName": "[concat(parameters('appName'),'Farm')]"
+    "serverFarmName": "[concat(parameters('appName'),'Farm')]",
+    "packageUri": "https://github.com/Azure/AzureTestDrive/raw/master/samples/webapp/msdeploy/contoso_webapp.zip"
   },
   "resources": [
     {
@@ -84,7 +79,7 @@
             "[resourceId('Microsoft.Web/sites',parameters('appName'))]"
           ],
           "properties": {
-            "packageUri": "[parameters('packageUri')]",
+            "packageUri": "[variables('packageUri')]",
             "dbType": "None",
             "setParameters": {
               "IIS Web Application Name": "[parameters('appName')]",
