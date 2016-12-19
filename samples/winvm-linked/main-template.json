@@ -1,0 +1,68 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminName": {
+      "type": "string",
+      "metadata": {
+        "type": "username",
+        "description": "Admin user name."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "type": "password",
+        "description": "Admin password."
+      }
+    },
+    "baseUri": {
+      "type": "string",
+      "metadata": {
+        "type": "baseuri",
+        "description": "Base URI for this deployment template."
+      }
+    }
+  },
+  "variables": {
+    "domainNameLabel": "[concat('contosovm',uniquestring(resourceGroup().id))]",
+    "storageAccountName": "[concat('contosodisk',uniquestring(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-01-01",
+      "name": "linkedTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('baseUri'),'template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vmName": { "value": "w2k12" },
+          "domainNameLabel": { "value": "[variables('domainNameLabel')]" },
+          "storageAccountName": { "value": "[variables('storageAccountName')]" },
+          "adminName": { "value": "[parameters('adminName')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "location": { "value": "[resourceGroup().location]" },
+          "vmSize": { "value": "Standard_D2_V2" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "Host Name": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments','linkedTemplate')).outputs.hostName.value]"
+    },
+    "User Name": {
+      "type": "string",
+      "value": "[parameters('adminName')]"
+    },
+    "Password": {
+      "type": "string",
+      "value": "[parameters('adminPassword')]"
+    }
+  }
+}

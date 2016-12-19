@@ -1,0 +1,189 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "VM name (non-unique)."
+      }
+    },
+    "domainNameLabel": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS name label."
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account for VM disks."
+      }
+    },
+    "adminName": {
+      "type": "string",
+      "metadata": {
+        "description": "VM admin user name."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "VM admin password."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment location."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "metadata": {
+        "description": "VM size."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName'))]",
+    "pubIpName": "[concat(parameters('vmName'),'-ip')]",
+    "pubIpId": "[resourceId('Microsoft.Network/publicIPAddresses',variables('pubIpName'))]",
+    "vnetName": "[concat(parameters('vmName'),'-vnet')]",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+    "ipconfName": "[concat(parameters('vmName'),'-ipconf')]",
+    "subnetName": "[concat(parameters('vmName'),'-subnet')]",
+    "intName": "[concat(parameters('vmName'),'-intf')]",
+    "intId": "[resourceId('Microsoft.Network/networkInterfaces',variables('intName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('storageAccountName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('pubIpName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('domainNameLabel')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('intName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('pubIpId')]",
+        "[variables('vnetId')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[variables('ipconfName')]",
+            "properties": {
+              "subnet": {
+                "id": "[concat(variables('vnetId'),'/subnets/',variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[variables('pubIpId')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[variables('storageAccountId')]",
+        "[variables('intId')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "sys0",
+            "vhd": {
+              "uri": "[concat(reference(variables('storageAccountId'),'2015-06-15').primaryEndpoints.blob,'vhds/sys0.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "data1",
+              "diskSizeGB": "20",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat(reference(variables('storageAccountId'),'2015-06-15').primaryEndpoints.blob,'vhds/data1.vhd')]"
+              },
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminName')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[variables('intId')]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "hostName": {
+      "type": "string",
+      "value": "[reference(variables('pubIpId')).dnsSettings.fqdn]"
+    }
+  }
+}
