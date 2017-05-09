@@ -1,0 +1,227 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseName": {
+            "defaultValue": "appsourcetestdrivedatabase",
+            "type": "String"
+        },
+        "databaseBackupStorageKey": {
+            "defaultValue": "<Key to your storage account that has backups>",
+            "type": "String"
+        },
+        "databaseBackupStorageLocation": {
+            "defaultValue": "<Link to your bacpac (database backup). Recommended you use a SAS key with expiry greater than 2 years>",
+            "type": "String"
+        },
+        "databaseAdmin": {
+            "defaultValue": "<database-user>",
+            "type": "String"
+        },
+		"databasePassword": {
+            "defaultValue": "<database-password>",
+            "type": "String"
+        },
+		"server_name": {
+            "defaultValue": "appsourcetestdriveserver",
+            "type": "String"
+        },
+        "serverfarms_name": {
+            "defaultValue": "appsourceserverfarm",
+            "type": "String"
+        },
+        "sites_name": {
+            "defaultValue": "appsourcetestdrivesite",
+            "type": "String"
+        }
+    },
+    "variables": {
+		"databaseName": "[concat(parameters('databaseName'),uniqueString(resourceGroup().name))]",
+		"databaseBackupStorageKeyType": "StorageAccessKey",
+		"server_name": "[concat(parameters('server_name'),uniqueString(resourceGroup().name))]",
+		"serverfarms_name": "[concat(parameters('serverfarms_name'),uniqueString(resourceGroup().name))]",
+		"sites_name": "[concat(parameters('sites_name'),uniqueString(resourceGroup().name))]"
+	},
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers",
+            "kind": "v12.0",
+            "name": "[variables('server_name')]",
+            "apiVersion": "2014-04-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "administratorLogin": "[parameters('databaseAdmin')]",
+                "administratorLoginPassword": "[parameters('databasePassword')]",
+                "version": "12.0"
+            },
+            "resources": [],
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "name": "[variables('serverfarms_name')]",
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[variables('serverfarms_name')]",
+                "numberOfWorkers": 1
+            },
+            "resources": [],
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "kind": "app",
+            "name": "[variables('sites_name')]",
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+			"resources": [
+				{
+					"apiVersion": "2015-08-01",
+					"type": "config",
+					"name": "connectionstrings",
+					"dependsOn": [
+					  "[concat('Microsoft.Web/Sites/', variables('sites_name'))]",
+					  "[resourceId('Microsoft.Sql/servers', variables('server_name'))]",
+					  "[concat('Microsoft.Web/Sites/', variables('sites_name'), '/Extensions/MSDeploy')]"
+					],
+					"properties": {
+						"VocApp.Properties.Settings.ConStrNew": {
+							"value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('server_name'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('databaseName'), ';User Id=', parameters('databaseAdmin'), '@', variables('server_name'), ';Password=', parameters('databasePassword'), ';')]",
+							"type": "SQLServer"
+						}
+					}
+				},
+				{
+					"name": "MSDeploy",
+					"type": "extensions",
+					"location": "[resourceGroup().location]",
+					"apiVersion": "2015-08-01",
+					"dependsOn": [
+						"[concat('Microsoft.Web/sites/', variables('sites_name'))]"
+					],
+					"tags": {
+						"displayName": "webDeploy"
+					},
+					"properties": {
+						"packageUri": "<Link to the web-package generated using MSDeploy>",
+						"dbType": "None",
+						"connectionString": ""
+					}
+				},
+				{
+					"apiVersion": "2014-11-01",
+					"name": "appsettings",
+					"type": "config",
+					"dependsOn": [
+						"[resourceId('Microsoft.Web/Sites', variables('sites_name'))]",
+						"[concat('Microsoft.Web/Sites/', variables('sites_name'), '/Extensions/MSDeploy')]"
+					],
+				    "properties": {
+					"SCM_COMMAND_IDLE_TIMEOUT": "90000",
+					"WEBJOBS_HISTORY_SIZE": "1",
+					"WEBJOBS_IDLE_TIMEOUT": "9000000",
+					"WEBSITE_NODE_DEFAULT_VERSION": "4.2.3",
+					"ida:ClientSecret": "<Client secret for your AAD app>",
+					"ida:ClientId": "<Client Id for your AAD app>",
+					"ida:Domain": "<Domain for your AAD Tenant>",
+					"ida:TenantId": "<Domain for your AAD Tenant>",
+					"ida:Tenant": "<Domain for your AAD Tenant>",
+					"ida:PostLogoutRedirectUri": "[concat('https://',variables('sites_name'),'.azurewebsites.net')]"
+				  }
+				}
+			  ],
+            "properties": {
+                "name": "[variables('sites_name')]",
+                "hostNames": [
+                    "[concat(variables('sites_name'),'.azurewebsites.net')]"
+                ],
+                "enabledHostNames": [
+                    "[concat(variables('sites_name'),'.azurewebsites.net')]",
+                    "[concat(variables('sites_name'),'.scm.azurewebsites.net')]"
+                ],
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(variables('sites_name'),'.azurewebsites.net')]",
+                        "sslState": 0,
+                        "thumbprint": null,
+                        "ipBasedSslState": 0
+                    },
+                    {
+                        "name": "[concat(variables('sites_name'),'.scm.azurewebsites.net')]",
+                        "sslState": 0,
+                        "thumbprint": null,
+                        "ipBasedSslState": 0
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('serverfarms_name'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('serverfarms_name'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('server_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "kind": "v12.0,user",
+            "name": "[concat(variables('server_name'),'/',variables('databaseName'))]",
+            "apiVersion": "2014-04-01-preview",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "edition": "Basic",
+                "status": "Online",
+                "serviceLevelObjective": "Basic",
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": "1073741824",
+                "requestedServiceObjectiveName": "Basic"
+            },
+			"resources": [
+				{
+                    "name": "Import",
+                    "type": "extensions",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                         "[variables('databaseName')]"
+                    ],
+                    "properties": {
+                          "storageKeyType": "[variables('databaseBackupStorageKeyType')]",
+                          "storageKey": "[parameters('databaseBackupStorageKey')]",
+                          "storageUri": "[parameters('databaseBackupStorageLocation')]",
+                          "administratorLogin": "[parameters('databaseAdmin')]",
+                          "administratorLoginPassword": "[parameters('databasePassword')]",
+                          "operationMode": "Import"
+                    }
+                }
+            ],
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('server_name'))]"
+            ]
+        }
+    ],
+    "outputs": {
+		"App Uri": {
+			"type": "string",
+			"value": "[concat('https://',variables('sites_name'),'.azurewebsites.net')]"
+		},
+		"PostDeployConfiguration": {
+			"type": "string",
+			"value": "<Link to your Post-Deployment Callback Uri (or Azure function)>"
+		},
+		"Marketplace": {
+			"type": "string",
+			"value": "AppSource"
+		},
+		"PublisherContactLink": {
+			"type": "string",
+			"value": "<Link to your app in AppSource.>"
+		}
+	}
+}
