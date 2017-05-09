@@ -1,0 +1,121 @@
+Project.json
+{
+  "frameworks": {
+    "net46":{
+      "dependencies": {
+        "Microsoft.IdentityModel.Clients.ActiveDirectory": "2.21.301221612",
+                                  "Microsoft.Azure.ActiveDirectory.GraphClient": "2.1.1",
+        "Newtonsoft.Json": "9.0.1"
+      }
+    }
+   }
+}
+ 
+Sample Azure function (Run.csx):
+ 
+	- Note tenantId, clientId, clientSecret are tokenized.
+	 
+using System;
+using System.Net;
+using Microsoft.Azure.ActiveDirectory.GraphClient;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Newtonsoft.Json;
+public class CaseInsensitiveDictionary : Dictionary<string, string>
+{
+    public CaseInsensitiveDictionary() : base(StringComparer.OrdinalIgnoreCase) { }
+}
+ 
+public static async Task<HttpResponseMessage> Run(HttpRequestMessage req, TraceWriter log)
+{
+    log.Info($"C# HTTP trigger function processed a request. RequestUri={req.RequestUri}");
+    string jsonContent = req.Content.ReadAsStringAsync().Result;
+    log.Info($"Content: {jsonContent}");
+    Dictionary<string, string> outputs = JsonConvert.DeserializeObject<CaseInsensitiveDictionary>(jsonContent);
+    await UpdateReplyUrl(outputs, log);
+    return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(req.RequestUri.ToString()) };
+}
+ 
+public static async Task UpdateReplyUrl(Dictionary<string, string> outputs, TraceWriter log)
+{
+    Guid correlationId = Guid.NewGuid();
+ 
+    string tenantId = "<tenant-Id>";
+    string clientId = "<client-Id>";
+    string clientSecret = "<client-Secret>";
+ 
+    if (!outputs.ContainsKey("App Uri"))
+    {
+        return;
+    }
+ 
+    string uri = outputs["App Uri"];
+    log.Info($"Id: {correlationId}, Uri to be added {uri}");
+ 
+    Uri servicePointUri = new Uri("https://graph.windows.net");
+    Uri serviceRoot = new Uri(servicePointUri, $"{tenantId}/");
+    ActiveDirectoryClient activeDirectoryClient = new ActiveDirectoryClient(serviceRoot,
+        async () =>
+        {
+            var token = await GetTokenForUser("https://graph.windows.net", tenantId, clientId, clientSecret);
+            return token;
+        });
+ 
+    Random r = new Random();
+    while (true)
+    {
+        var appPage = await activeDirectoryClient.Applications.Where(s => s.AppId.Equals(clientId))
+            .Take(1).ExecuteAsync();
+        if (appPage?.CurrentPage != null && appPage.CurrentPage.Count == 1)
+        {
+            //Application found
+            var app = appPage.CurrentPage.First();
+ 
+            if (!app.ReplyUrls.Any(t => string.Equals(t, uri, StringComparison.OrdinalIgnoreCase)))
+            {
+                log.Info($"Id: {correlationId}, Adding Uri {uri}");
+                app.ReplyUrls.Add(uri);
+                await app.UpdateAsync();
+            }
+            else
+            {
+                log.Info($"Id: {correlationId}, Reply Uri exists: {uri}");
+                break;
+            }
+ 
+            log.Info("Id: {correlationId}, Reply URIs" + String.Join(", ", appPage.CurrentPage.First().ReplyUrls.ToArray()));
+ 
+            // Making a delayed search to ensure that the app "sticks", else it's added back.
+            await Task.Delay(TimeSpan.FromSeconds(5 + r.Next(15)));
+            appPage = await activeDirectoryClient.Applications.Where(s => s.AppId.Equals(clientId))
+               .Take(1).ExecuteAsync();
+            app = appPage?.CurrentPage?.FirstOrDefault();
+            if (app != null && app.ReplyUrls != null && app.ReplyUrls.Contains(uri))
+            {
+                break;
+            }
+        }
+    }
+ 
+}
+ 
+public static async Task<string> GetTokenForUser(
+    string resourceUrl,
+    string tenantId,
+    string clientId,
+    string clientSecret)
+ 
+{
+    string TokenForUser = null;
+    if (TokenForUser == null)
+ 
+    {
+        var context =
+                new AuthenticationContext($"https://login.windows.net/{tenantId}");
+ 
+        AuthenticationResult userAuthnResult = await context.AcquireTokenAsync(
+            resourceUrl, new ClientCredential(clientId, clientSecret));
+        TokenForUser = userAuthnResult.AccessToken;
+    }
+ 
+    return TokenForUser;
+}
