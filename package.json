@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "azure-test-drive-devkit",
   "version": "1.0.0",
   "description": "TestDriveDevKit",
@@ -15,12 +15,12 @@
   ],
   "main": "test-drive.js",
   "dependencies": {
-    "azure-arm-resource": "^1.6.1-preview",
-    "chalk": "^1.1.3",
-    "lodash": "^4.17.2",
-    "ms-rest-azure": "^1.15.2",
-    "q": "^1.4.1",
-    "request": "^2.79.0",
-    "uuid": "^3.0.0"
+    "azure-arm-resource": "^2.0.0-preview",
+    "chalk": "^2.1.0",
+    "lodash": "^4.17.4",
+    "ms-rest-azure": "2.2.3",
+    "q": "^1.5.0",
+    "request": "^2.81.0",
+    "uuid": "^3.1.0"
   }
 }
