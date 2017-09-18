@@ -73,8 +73,6 @@ Parameters created
 }
 ```
 
-See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
-
 ### Start Session
 
 The **start session** command instantiates your template using the specified Azure subscription.
@@ -145,10 +143,10 @@ Here is the sample **settings.json** (subscription id, tenant id, app id and app
 | appId                 | GUID      | AD Application Id (see details below).
 | appKey                | String    | AD Application password (see details below).
 | location              | String    | Target deployment location.
-| deploymentTemplateUri | Uri       | Uri of your deployment template somewhere on the PUBLIC blob storage (See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information).
-| baseUri               | Uri       | Base Uri of your deployment template (See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information).
+| deploymentTemplateUri | Uri       | Uri of your deployment template somewhere on the PUBLIC blob storage
+| baseUri               | Uri       | Base Uri of your deployment template 
 
-Please note, this project, as well as Azure Test Drive, use service principal to access your subscription. See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
+Please note, this project, as well as Azure Test Drive, use service principal to access your subscription.
 
 ### Get Deployment Status
 
@@ -174,8 +172,6 @@ Deployment retrieved
 }
 Deployment Status: Success
 ```
-
-See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
 
 ### Get Deployment Operations
 
@@ -204,7 +200,7 @@ Deployment Operations retrieved
 ]
 ```
 
-This information is also available through the [Azure Portal](https://portal.azure.com/). See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
+This information is also available through the [Azure Portal](https://portal.azure.com/).
 
 ### Stop Session
 
@@ -227,9 +223,6 @@ Deleting Resource Group: CloudTry_585f9917ac694989bede259efe941e49
 Resource Group scheduled for deletion
 ```
 
-See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information.
-
 ## Documentation
 
 * See [Azure Test Drive WIKI](https://github.com/Azure/AzureTestDrive/wiki) for more information.
-* See [Authoring Test Drives](https://github.com/Azure/AzureTestDrive/wiki/Authoring-Test-Drives) for more information how to build, test and debug deployment packages for Azure Test Drive.
